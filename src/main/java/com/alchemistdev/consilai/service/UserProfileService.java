@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -24,10 +25,17 @@ public class UserProfileService {
     private final UserProfileRepository profileRepository;
     private final ImageStorageUtil imageStorageUtil;
     
-    public UserProfile getOrCreateProfile(User user) {
+
+
+    public UserProfile getOrCreateProfile(User user, UserProfileUpdateRequest request) {
         return profileRepository.findByUser(user).orElseGet(() -> {
+
+            
             UserProfile profile = UserProfile.builder()
                     .user(user)
+                    .bio(request.getBio())
+                    .birthDate(request.getBirthDate())
+                    .maritalStatus(request.getMaritalStatus())
                     .isVerified(false)
                     .isPremium(false)
                     .build();
@@ -36,7 +44,7 @@ public class UserProfileService {
     }
 
     public UserProfile updateProfile(User user, UserProfileUpdateRequest request) {
-        UserProfile profile = getOrCreateProfile(user);
+        UserProfile profile = getOrCreateProfile(user, request);
 
         profile.setBio(request.getBio());
         profile.setBirthDate(request.getBirthDate());
@@ -47,7 +55,7 @@ public class UserProfileService {
 
 
     public String updateProfilePicture(User user, MultipartFile file) {
-        UserProfile profile = getOrCreateProfile(user);
+        UserProfile profile = getProfile(user).get();
 
         try {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -62,6 +70,10 @@ public class UserProfileService {
         } catch (IOException e) {
             throw new RuntimeException("Error al guardar la imagen de perfil", e);
         }
+    }
+
+    public Optional<UserProfile> getProfile(User user) {
+        return profileRepository.findByUser(user);
     }
 }
 

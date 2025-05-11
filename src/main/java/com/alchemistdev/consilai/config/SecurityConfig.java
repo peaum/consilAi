@@ -1,7 +1,7 @@
 package com.alchemistdev.consilai.config;
 
 import com.alchemistdev.consilai.repository.UserRepository;
-import com.alchemistdev.consilai.security.CustomOAuth2UserService;
+import com.alchemistdev.consilai.security.JwtAuthenticationFilter;
 import com.alchemistdev.consilai.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
@@ -21,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,12 +39,14 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                /* .oauth2Login(oauth2 -> oauth2
                     .loginPage("/oauth2/authorization/google")
                     .userInfoEndpoint(userInfo -> userInfo
                             .userService(customOAuth2UserService()) // ← Aquí
                     )
-                )
+                )*/
                 .build();
     }
 
@@ -63,8 +67,5 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-        public CustomOAuth2UserService customOAuth2UserService() {
-            return new CustomOAuth2UserService(userRepository);
-    }
+    
 }

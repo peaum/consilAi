@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 
+import com.alchemistdev.consilai.enums.MaritalStatus;
+
 @Entity
 @Table(name = "user_profile")
 @Data
@@ -27,7 +29,7 @@ public class UserProfile {
 
     private LocalDate birthDate;
 
-    private String maritalStatus;
+    private MaritalStatus maritalStatus;
 
     private boolean isVerified;
 

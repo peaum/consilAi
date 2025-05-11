@@ -2,6 +2,8 @@ package com.alchemistdev.consilai.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Slf4j
 public class JwtService {
 
     private static final String SECRET_KEY = "NFNNBiMoSyNdIt0jXYyOMy0BzF2N9RGJsnhrcXe8oKw=";
@@ -41,6 +44,10 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, String expectedUsername) {
+
+        log.info("Token: {}", token);
+        log.info("Validating token for user: {}", expectedUsername);
+
         return expectedUsername.equals(extractUsername(token)) && !isTokenExpired(token);
     }
 

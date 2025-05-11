@@ -1,5 +1,6 @@
 package com.alchemistdev.consilai.controller;
 
+import com.alchemistdev.consilai.dto.UserProfileResponse;
 import com.alchemistdev.consilai.dto.UserProfileUpdateRequest;
 import com.alchemistdev.consilai.model.User;
 import com.alchemistdev.consilai.model.UserProfile;
@@ -22,18 +23,27 @@ public class UserProfileController {
     private final UserProfileService profileService;
 
     @GetMapping
-    public UserProfile getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+    public UserProfileResponse getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         User user = (User) userDetails;
-        return profileService.getOrCreateProfile(user);
+        return convertToResponse(profileService.getProfile(user).get());
     }
 
-    @PutMapping
-    public UserProfile updateProfile(
+    @PostMapping
+    public UserProfileResponse createProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UserProfileUpdateRequest request
     ) {
         User user = (User) userDetails;
-        return profileService.updateProfile(user, request);
+        return convertToResponse(profileService.getOrCreateProfile(user, request));
+    }
+
+    @PutMapping
+    public UserProfileResponse updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody UserProfileUpdateRequest request
+    ) {
+        User user = (User) userDetails;
+        return convertToResponse(profileService.updateProfile(user, request));
     }
 
     @PostMapping("/picture")
@@ -45,4 +55,28 @@ public class UserProfileController {
         String fileName = profileService.updateProfilePicture(user, file);
         return ResponseEntity.ok(Map.of("profilePictureUrl", "/images/profile/" + fileName));
     }
+
+
+    @GetMapping("/has-profile")
+    public ResponseEntity<Map<String, Boolean>> hasProfile(@AuthenticationPrincipal User user) {
+        boolean exists = profileService.getProfile(user).isPresent();
+        return ResponseEntity.ok(Map.of("hasProfile", exists));
+    }
+    
+
+
+    private UserProfileResponse convertToResponse(UserProfile profile) {
+        return new UserProfileResponse(
+                profile.getUser().getId(),
+                profile.getUser().getEmail(),
+                profile.getProfilePictureUrl(),
+                profile.getBio(),
+                profile.getBirthDate(),
+                profile.getMaritalStatus(),
+                profile.isVerified(),
+                profile.isPremium(),
+                profile.getPremiumExpiration()
+        );
+    }
+
 }

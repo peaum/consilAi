@@ -51,3 +51,11 @@ Thumbs.db
 src/main/resources/*.env*
 src/main/resources/*.env
 # === Test r
+
+
+
+# Ignorar contenido pero mantener la carpeta
+uploads/*
+!uploads/.gitkeep
+uploads/profile-pictures/*
+!uploads/profile-pictures/.gitkeep

@@ -48,5 +48,6 @@ Thumbs.db
 # === Env files (si usas variables de entorno) ===
 .env
 .env.*
-
+src/main/resources/*.env*
+src/main/resources/*.env
 # === Test r

@@ -55,13 +55,32 @@ public class UserProfileService {
 
 
     public String updateProfilePicture(User user, MultipartFile file) {
-        UserProfile profile = getProfile(user).get();
+    UserProfile profile = getProfile(user).get();
 
         try {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path path = Paths.get("uploads/profile-pictures", fileName);
-            Files.createDirectories(path.getParent());
-            Files.write(path, file.getBytes());
+            // Sanitiza el nombre original del fichero (solo nombre, sin rutas)
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isBlank()) {
+                throw new IllegalArgumentException("El nombre del archivo es inválido");
+            }
+
+            String sanitizedFilename = Paths.get(originalFilename).getFileName().toString()
+                .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+
+            String fileName = UUID.randomUUID() + "_" + sanitizedFilename;
+
+            // Asegura que el path resultante esté dentro del directorio permitido
+            Path uploadDir = Paths.get("uploads/profile-pictures").toAbsolutePath().normalize();
+            Files.createDirectories(uploadDir);
+
+            Path targetPath = uploadDir.resolve(fileName).normalize();
+
+            // Validación extra por si acaso
+            if (!targetPath.startsWith(uploadDir)) {
+                throw new SecurityException("Intento de path traversal detectado");
+            }
+
+            Files.write(targetPath, file.getBytes());
 
             profile.setProfilePictureUrl(fileName);
             profileRepository.save(profile);

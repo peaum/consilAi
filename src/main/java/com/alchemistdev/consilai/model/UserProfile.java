@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 import com.alchemistdev.consilai.enums.MaritalStatus;
+import com.alchemistdev.consilai.enums.Gender;
 
 @Entity
 @Table(name = "user_profile")
@@ -36,4 +37,7 @@ public class UserProfile {
     private boolean isPremium;
 
     private LocalDate premiumExpiration;
+
+    private Gender gender;
+    
 }

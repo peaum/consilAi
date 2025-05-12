@@ -55,4 +55,11 @@ public class User implements org.springframework.security.core.userdetails.UserD
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private UserProfile profile;
+
+    public UserProfile getProfile() {
+        return profile;
+    }
 }

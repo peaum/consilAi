@@ -15,7 +15,7 @@ import java.util.function.Function;
 @Slf4j
 public class JwtService {
 
-    private static final String SECRET_KEY = System.getenv("secret");
+    private static final String SECRET_KEY = System.getProperty("secret");
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -27,6 +27,7 @@ public class JwtService {
                 .addClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
+                //.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2)) // 2 horas
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

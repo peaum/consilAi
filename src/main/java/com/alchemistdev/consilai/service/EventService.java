@@ -51,23 +51,37 @@ public class EventService {
     }
 
     public String saveEventPicture(Long eventId, MultipartFile file) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Evento no encontrado con ID: " + eventId));
+    Event event = eventRepository.findById(eventId)
+            .orElseThrow(() -> new EntityNotFoundException("Evento no encontrado con ID: " + eventId));
 
-        try {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path path = Paths.get("uploads/events-pictures", fileName);
-            Files.createDirectories(path.getParent());
-            Files.write(path, file.getBytes());
+    try {
+        // Extraer extensión de forma segura
+        String originalName = file.getOriginalFilename();
+        String extension = (originalName != null && originalName.contains("."))
+                ? originalName.substring(originalName.lastIndexOf("."))
+                : ".jpg"; // valor por defecto
 
-            event.setImagePath(fileName);
-            eventRepository.save(event);
-
-            return fileName;
-        } catch (IOException e) {
-            throw new RuntimeException("Error al guardar la imagen del evento", e);
+        // Validar extensiones permitidas
+        if (!List.of(".jpg", ".jpeg", ".png", ".webp").contains(extension.toLowerCase())) {
+            throw new IllegalArgumentException("Tipo de archivo no permitido");
         }
+
+        // Construcción segura del nombre del archivo
+        String fileName = UUID.randomUUID() + extension;
+        Path directory = Paths.get("uploads", "events-pictures");
+        Files.createDirectories(directory);
+        Path filePath = directory.resolve(fileName);
+
+        Files.write(filePath, file.getBytes());
+
+        event.setImagePath(fileName);
+        eventRepository.save(event);
+
+        return fileName;
+    } catch (IOException e) {
+        throw new RuntimeException("Error al guardar la imagen del evento", e);
     }
+}
 
 
 

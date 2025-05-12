@@ -15,7 +15,7 @@ import java.util.function.Function;
 @Slf4j
 public class JwtService {
 
-    private static final String SECRET_KEY = "NFNNBiMoSyNdIt0jXYyOMy0BzF2N9RGJsnhrcXe8oKw=";
+    private static final String SECRET_KEY = System.getenv("secret");
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
